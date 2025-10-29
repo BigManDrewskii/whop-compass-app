@@ -28,7 +28,6 @@ export default function AdminDashboard() {
 	const params = useParams()
 	const experienceId = params.experienceId as string
 	const queryClient = useQueryClient()
-	const [isCreating, setIsCreating] = useState(false)
 	const [editingCard, setEditingCard] = useState<Card | null>(null)
 
 	// Fetch cards
@@ -71,22 +70,23 @@ export default function AdminDashboard() {
 
 	// Create card mutation
 	const createMutation = useMutation({
-		mutationFn: async (type: 'text' | 'image' | 'video') => {
+		mutationFn: async () => {
 			const res = await fetch('/api/cards', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({
-					type,
-					title: `New ${type} card`,
-					content: type === 'text' ? 'Enter your content here...' : null,
+					type: 'text', // Default type, will be auto-detected when banner is added
+					title: 'New Card',
+					content: 'Enter your content here...',
 				}),
 			})
 			if (!res.ok) throw new Error('Failed to create card')
 			return res.json()
 		},
-		onSuccess: () => {
+		onSuccess: (data) => {
 			queryClient.invalidateQueries({ queryKey: ['cards'] })
-			setIsCreating(false)
+			// Automatically open the editor for the new card
+			setEditingCard(data.card)
 		},
 	})
 
@@ -159,49 +159,14 @@ export default function AdminDashboard() {
 
 				{/* Add Card Button */}
 				<div className="mb-6">
-					{!isCreating ? (
-						<button
-							onClick={() => setIsCreating(true)}
-							className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-[#fa4616] hover:bg-[#e03d12] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#fa4616] transition-colors"
-						>
-							<Plus className="h-4 w-4 mr-2" />
-							Add Card
-						</button>
-					) : (
-						<div className="bg-[#262626] rounded-lg shadow p-4 border border-[#7f7f7f]/20">
-							<p className="text-sm font-medium text-gray-300 mb-3">Select card type:</p>
-							<div className="flex gap-2">
-								<button
-									onClick={() => createMutation.mutate('text')}
-									disabled={createMutation.isPending}
-									className="px-4 py-2 bg-[#fa4616] hover:bg-[#e03d12] rounded-md text-sm font-medium text-white disabled:opacity-50 transition-colors"
-								>
-									Text
-								</button>
-								<button
-									onClick={() => createMutation.mutate('image')}
-									disabled={createMutation.isPending}
-									className="px-4 py-2 bg-[#fa4616] hover:bg-[#e03d12] rounded-md text-sm font-medium text-white disabled:opacity-50 transition-colors"
-								>
-									Image
-								</button>
-								<button
-									onClick={() => createMutation.mutate('video')}
-									disabled={createMutation.isPending}
-									className="px-4 py-2 bg-[#fa4616] hover:bg-[#e03d12] rounded-md text-sm font-medium text-white disabled:opacity-50 transition-colors"
-								>
-									Video
-								</button>
-								<button
-									onClick={() => setIsCreating(false)}
-									disabled={createMutation.isPending}
-									className="px-4 py-2 bg-[#141212] border border-[#7f7f7f]/30 hover:bg-[#262626] rounded-md text-sm font-medium text-gray-300 disabled:opacity-50 transition-colors"
-								>
-									Cancel
-								</button>
-							</div>
-						</div>
-					)}
+					<button
+						onClick={() => createMutation.mutate()}
+						disabled={createMutation.isPending}
+						className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-[#fa4616] hover:bg-[#e03d12] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#fa4616] disabled:opacity-50 transition-colors"
+					>
+						<Plus className="h-4 w-4 mr-2" />
+						{createMutation.isPending ? 'Creating...' : 'Add Card'}
+					</button>
 				</div>
 
 				{/* Loading State */}
@@ -249,15 +214,17 @@ export default function AdminDashboard() {
 																<GripVertical className="w-5 h-5" />
 															</div>
 
-															{/* Type Badge */}
-															<span className="px-2 py-1 text-xs font-medium rounded-md bg-[#262626] text-[#fafafa] border border-[#7f7f7f]/30 inline-flex items-center gap-1">
-																{card.type}
-															</span>
-
 															{/* Title */}
 															<span className="font-medium text-white">
 																{card.title || 'Untitled'}
 															</span>
+
+															{/* Badge showing if card has banner */}
+															{card.mediaUrl && (
+																<span className="px-2 py-1 text-xs font-medium rounded-md bg-[#fa4616]/10 text-[#fa4616] border border-[#fa4616]/30">
+																	Has Banner
+																</span>
+															)}
 														</div>
 
 														{/* Actions */}
