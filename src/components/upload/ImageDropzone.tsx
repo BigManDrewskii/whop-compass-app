@@ -79,18 +79,12 @@ export function MediaDropzone({
     [onUploadComplete]
   )
 
-  // Configure accepted file types based on prop
-  const acceptConfig =
-    accept === 'image' ? { 'image/*': ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg'] } :
-    accept === 'video' ? { 'video/*': ['.mp4', '.webm', '.ogg', '.mov'] } :
-    {
-      'image/*': ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg'],
-      'video/*': ['.mp4', '.webm', '.ogg', '.mov']
-    }
-
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
-    accept: acceptConfig,
+    accept: {
+      'image/*': ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg'],
+      'video/*': ['.mp4', '.webm', '.ogg', '.mov']
+    },
     maxFiles: 1,
     maxSize: 50 * 1024 * 1024, // 50MB (handles videos)
     disabled: uploading,
