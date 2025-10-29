@@ -37,7 +37,7 @@ export function UnifiedCard({ banner, title, content }: UnifiedCardProps) {
 
             {banner.type === 'video' && banner.url && (
               <div className="w-full h-full">
-                <VideoEmbed url={banner.url} title={title} />
+                <VideoEmbed url={banner.url} />
               </div>
             )}
 
