@@ -12,6 +12,8 @@ interface UnifiedCardProps {
 }
 
 export function UnifiedCard({ banner, title, content }: UnifiedCardProps) {
+  // Debug: Log banner data
+  console.log('[UnifiedCard] Rendering with banner:', banner)
 
   return (
     <div className="relative min-h-screen flex items-center justify-center p-4 sm:p-8">
@@ -23,7 +25,7 @@ export function UnifiedCard({ banner, title, content }: UnifiedCardProps) {
 
         {/* Banner Section */}
         {banner?.url && (
-          <div className="w-full aspect-video bg-[#141212]">
+          <div className="w-full aspect-video bg-[#141212] flex items-center justify-center">
             {banner.type === 'image' && (
               <img
                 src={banner.url}
@@ -33,8 +35,15 @@ export function UnifiedCard({ banner, title, content }: UnifiedCardProps) {
               />
             )}
 
-            {banner.type === 'video' && (
-              <VideoEmbed url={banner.url} title={title} />
+            {banner.type === 'video' && banner.url && (
+              <div className="w-full h-full">
+                <VideoEmbed url={banner.url} title={title} />
+              </div>
+            )}
+
+            {/* Debug: Show if banner exists but no type match */}
+            {!banner.type && (
+              <div className="text-white text-sm">Debug: Banner URL exists but no type</div>
             )}
           </div>
         )}

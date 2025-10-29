@@ -25,6 +25,9 @@ export function VideoEmbed({ url, title = 'Video' }: VideoEmbedProps) {
   const [hasError, setHasError] = useState(false)
   const [retryCount, setRetryCount] = useState(0)
 
+  // Debug: Log video URL
+  console.log('[VideoEmbed] Rendering video:', { url, title, isLoading, hasError })
+
   const convertToEmbedUrl = (videoUrl: string): string => {
     // YouTube watch URLs
     const youtubeWatch = videoUrl.match(/youtube\.com\/watch\?v=([^&]+)/)
@@ -87,8 +90,11 @@ export function VideoEmbed({ url, title = 'Video' }: VideoEmbedProps) {
   const embedUrl = convertToEmbedUrl(url)
   const isDirect = isDirectVideo(url)
 
+  // Debug: Log converted URL
+  console.log('[VideoEmbed] Converted URL:', { original: url, embed: embedUrl, isDirect })
+
   return (
-    <div className="relative w-full">
+    <div className="relative w-full h-full">
       {/* Loading Skeleton */}
       {isLoading && (
         <div className="absolute inset-0 bg-[#262626] rounded-lg flex items-center justify-center z-10">
@@ -140,22 +146,18 @@ export function VideoEmbed({ url, title = 'Video' }: VideoEmbedProps) {
         </video>
       )}
 
-      {/* Embedded Video (YouTube/Vimeo) */}
+      {/* Embedded Video (YouTube/Vimeo/Loom) */}
       {!hasError && !isDirect && (
-        <div className="relative" style={{ paddingBottom: '56.25%' }}>
-          <iframe
-            key={`iframe-${retryCount}`}
-            src={embedUrl}
-            title={title}
-            className="absolute top-0 left-0 w-full h-full rounded-lg shadow-2xl"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-            allowFullScreen
-            loading="lazy"
-            onLoad={handleLoad}
-            onError={handleError}
-            sandbox="allow-scripts allow-same-origin allow-presentation allow-forms"
-          />
-        </div>
+        <iframe
+          key={`iframe-${retryCount}`}
+          src={embedUrl}
+          title={title}
+          className="w-full h-full rounded-lg"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          allowFullScreen
+          onLoad={handleLoad}
+          onError={handleError}
+        />
       )}
     </div>
   )
