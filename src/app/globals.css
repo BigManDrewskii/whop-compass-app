@@ -1,0 +1,51 @@
+@import "tailwindcss";
+
+:root {
+  /* Whop Brand Colors */
+  --whop-orange: #fa4616;
+  --whop-orange-hover: #e03d12;
+  --whop-dark: #141212;
+  --whop-charcoal: #262626;
+  --whop-gray: #7f7f7f;
+  --whop-white: #fafafa;
+  --whop-light-gray: #f0f0f0;
+
+  /* Semantic tokens */
+  --background: var(--whop-dark);
+  --foreground: var(--whop-white);
+  --accent: var(--whop-orange);
+  --muted: var(--whop-charcoal);
+  --border: var(--whop-gray);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-accent: var(--accent);
+  --color-muted: var(--muted);
+  --color-border: var(--border);
+
+  --font-sans: var(--font-inter), var(--font-geist-sans), system-ui, -apple-system, sans-serif;
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+}
+
+/* Swiper custom pagination styles with Whop brand */
+.swiper-pagination-custom .swiper-pagination-bullet {
+	width: 10px;
+	height: 10px;
+	background: rgba(127, 127, 127, 0.5);
+	opacity: 1;
+	transition: all 0.3s ease;
+}
+
+.swiper-pagination-custom .swiper-pagination-bullet-active {
+	width: 24px;
+	border-radius: 5px;
+	background: #fa4616;
+}

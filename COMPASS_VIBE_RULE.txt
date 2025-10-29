@@ -1,0 +1,86 @@
+# Claude Code Vibe Rule for Compass
+
+**Copy this into the "Content" field of your vibe rule in Claude Code**
+
+---
+
+Project: Compass - Whop Onboarding Cards App
+Stack: React 19, tRPC 11, Express 4, PostgreSQL (Supabase), Drizzle ORM, Tailwind 4
+
+DOCUMENTATION:
+- /mnt/user-data/uploads/COMPASS_SETUP.md - Setup with Supabase
+- /mnt/user-data/uploads/COMPASS_SPEC.md - Architecture (PostgreSQL)
+- /mnt/user-data/uploads/COMPASS_TODO.md - Task checklist
+- /mnt/user-data/uploads/COMPASS_QUICK_REF.md - Code patterns
+- /mnt/user-data/uploads/COMPASS_STARTER_PROMPT.md - Initial prompt
+
+CRITICAL POSTGRESQL/SUPABASE RULES:
+1. Use pgTable, NOT mysqlTable
+2. Use serial("id"), NOT int("id").autoincrement()
+3. Use text("field"), NOT varchar("field", { length: 255 })
+4. Use text("field", { enum: [...] }), NOT mysqlEnum(...)
+5. PostgreSQL columns are case-sensitive: use "companyId" in raw SQL
+6. NO unique constraint on (companyId, order) - causes reordering issues
+7. Use Supabase Storage (@supabase/supabase-js) for media uploads
+8. Use Transaction pooler connection for app, Direct for migrations
+
+MEDIA HANDLING:
+- Video cards with uploads: use mediaUrl field
+- Video cards with embeds (YouTube/Vimeo): use content field
+- Storage: Supabase Storage bucket "compass-media" (public)
+- Max file size: 100MB
+- Allowed: image/jpeg, image/png, image/gif, video/mp4, video/quicktime
+
+SECURITY:
+- All admin procedures check ctx.user.role === 'admin'
+- All queries filter by ctx.user.companyId
+- Validate on server with Zod
+- Use prepared statements (Drizzle handles this)
+- Enable Supabase RLS policies for extra security
+
+CODING STANDARDS:
+- TypeScript strict mode, proper types everywhere
+- Functional components, React hooks (no class components)
+- Use async/await, no callbacks
+- Tailwind for styling, shadcn/ui components
+- Import from 'drizzle-orm/pg-core' for PostgreSQL
+
+DATABASE SCHEMA:
+users: add role (text enum), companyId (text)
+onboarding_cards: id (serial), companyId, order, type (enum), title, content, mediaUrl, mediaMimeType, createdAt, updatedAt, createdBy
+- Index on (companyId, order)
+- NO unique constraint
+
+WORKFLOW:
+1. Read relevant docs section first
+2. Show code before executing
+3. Verify against docs
+4. Check off COMPASS_TODO.md items
+5. Test each feature before moving on
+
+POSTGRESQL SPECIFIC:
+- Use .returning() for INSERT operations (PostgreSQL feature)
+- timestamp("field") for dates, not datetime()
+- Create indexes with: index("name").on(table.col1, table.col2)
+- Quote column names in raw SQL if camelCase
+
+SUPABASE STORAGE:
+- Initialize with: createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY)
+- Upload: supabase.storage.from('compass-media').upload(filename, buffer)
+- Get URL: supabase.storage.from('compass-media').getPublicUrl(path)
+- Set bucket policies for public read access
+
+COMMON PITFALLS TO AVOID:
+- Don't use MySQL syntax (use PostgreSQL)
+- Don't create objects in render (use useMemo/useCallback)
+- Don't forget loading states and error handling
+- Don't use dangerouslySetInnerHTML with user content
+- Don't forget to invalidate queries after mutations
+- Don't forget case sensitivity in PostgreSQL columns
+
+VIDEO EMBEDS:
+- YouTube: convert to https://www.youtube.com/embed/VIDEO_ID
+- Vimeo: convert to https://player.vimeo.com/video/VIDEO_ID
+- Store embed URL in content field, not mediaUrl
+
+When in doubt, check COMPASS_SPEC.md or COMPASS_QUICK_REF.md
