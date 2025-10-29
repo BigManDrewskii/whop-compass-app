@@ -64,8 +64,8 @@ export function OnboardingCarousel({ cards }: OnboardingCarouselProps) {
 				url: card.mediaUrl,
 			}
 		} else if (card.type === 'video') {
-			// Video URL can be in content (embed) or mediaUrl (direct)
-			const videoUrl = card.content || card.mediaUrl
+			// Video URL is in mediaUrl (all videos: YouTube, Vimeo, Loom, direct)
+			const videoUrl = card.mediaUrl || card.content
 			if (videoUrl) {
 				banner = {
 					type: 'video' as const,

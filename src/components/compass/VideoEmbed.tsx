@@ -44,6 +44,17 @@ export function VideoEmbed({ url, title = 'Video' }: VideoEmbedProps) {
       return `https://player.vimeo.com/video/${vimeo[1]}`
     }
 
+    // Loom share URLs (convert to embed)
+    const loomShare = videoUrl.match(/loom\.com\/share\/([a-zA-Z0-9]+)/)
+    if (loomShare) {
+      return `https://www.loom.com/embed/${loomShare[1]}`
+    }
+
+    // Loom embed URLs (already in correct format)
+    if (videoUrl.includes('loom.com/embed/')) {
+      return videoUrl
+    }
+
     // Already an embed URL or direct video
     return videoUrl
   }

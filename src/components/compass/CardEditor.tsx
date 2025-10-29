@@ -30,10 +30,10 @@ export function CardEditor({ card, isOpen, onClose, onSave }: CardEditorProps) {
 	useEffect(() => {
 		if (card) {
 			setTitle(card.title || '')
-			// Content is always in content field for text, or stored for video embeds
+			// Content is the text body (always from content field)
 			setContent(card.content || '')
-			// Banner is the mediaUrl (image or video)
-			setBannerUrl(card.mediaUrl || card.content || '')
+			// Banner is in mediaUrl (for both images and videos)
+			setBannerUrl(card.mediaUrl || '')
 		}
 	}, [card])
 
@@ -53,7 +53,8 @@ export function CardEditor({ card, isOpen, onClose, onSave }: CardEditorProps) {
 			lowerUrl.match(/\.(mp4|webm|ogg|mov)$/) ||
 			lowerUrl.includes('youtube.com') ||
 			lowerUrl.includes('youtu.be') ||
-			lowerUrl.includes('vimeo.com')
+			lowerUrl.includes('vimeo.com') ||
+			lowerUrl.includes('loom.com')
 		) {
 			return 'video'
 		}
@@ -76,18 +77,9 @@ export function CardEditor({ card, isOpen, onClose, onSave }: CardEditorProps) {
 			const detectedType = detectMediaType(bannerUrl)
 			updates.type = detectedType
 
-			// Store banner appropriately
-			if (detectedType === 'video') {
-				// For videos, store URL in content for embed conversion
-				if (bannerUrl.includes('youtube.com') || bannerUrl.includes('youtu.be') || bannerUrl.includes('vimeo.com')) {
-					updates.content = bannerUrl.trim() || null
-					updates.mediaUrl = null
-				} else {
-					// Direct video file
-					updates.mediaUrl = bannerUrl.trim() || null
-				}
-			} else if (detectedType === 'image') {
-				// For images, store in mediaUrl
+			// Store banner URL - ALL videos and images go to mediaUrl
+			// This keeps video URLs separate from text content
+			if (detectedType === 'video' || detectedType === 'image') {
 				updates.mediaUrl = bannerUrl.trim() || null
 			} else {
 				// Text cards - no banner
@@ -200,6 +192,7 @@ export function CardEditor({ card, isOpen, onClose, onSave }: CardEditorProps) {
 										<div className="text-xs text-gray-400 space-y-1">
 											<p>• YouTube: youtube.com/watch?v=...</p>
 											<p>• Vimeo: vimeo.com/...</p>
+											<p>• Loom: loom.com/share/...</p>
 											<p>• Direct: .mp4, .webm, .ogg files</p>
 										</div>
 									</div>
