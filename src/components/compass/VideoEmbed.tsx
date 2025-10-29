@@ -5,7 +5,7 @@ import { useState } from 'react'
 import { Play, AlertCircle } from 'lucide-react'
 
 // Dynamic import to avoid SSR hydration issues
-const ReactPlayer = dynamic(() => import('react-player/lazy'), { ssr: false })
+const ReactPlayer = dynamic(() => import('react-player'), { ssr: false })
 
 interface VideoEmbedProps {
   url: string
@@ -25,47 +25,19 @@ export function VideoEmbed({ url, title = 'Video' }: VideoEmbedProps) {
 
   console.log('[VideoEmbed] Rendering with react-player:', url)
 
+  // TEST: Basic iframe to see if ANY iframe works
   return (
-    <div className="w-full aspect-video bg-[#141212] rounded-lg overflow-hidden relative">
-      {/* Loading State */}
-      {!ready && !error && (
-        <div className="absolute inset-0 bg-[#262626] flex items-center justify-center z-10">
-          <div className="text-center space-y-3">
-            <div className="w-16 h-16 mx-auto bg-[#fa4616]/20 rounded-full flex items-center justify-center">
-              <Play className="w-8 h-8 text-[#fa4616] animate-pulse" />
-            </div>
-            <p className="text-sm text-gray-400">Loading video...</p>
-          </div>
-        </div>
-      )}
-
-      {/* Error State */}
-      {error && (
-        <div className="absolute inset-0 bg-[#262626] flex items-center justify-center p-4">
-          <div className="text-center">
-            <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-3" />
-            <p className="text-sm text-gray-400">Video failed to load</p>
-          </div>
-        </div>
-      )}
-
-      {/* ReactPlayer */}
-      <ReactPlayer
-        url={url}
-        width="100%"
-        height="100%"
-        controls
-        onReady={() => setReady(true)}
-        onError={() => setError(true)}
-        config={{
-          youtube: {
-            playerVars: { modestbranding: 1, rel: 0 }
-          },
-          vimeo: {
-            playerOptions: { byline: false, portrait: false }
-          }
-        }}
+    <div className="w-full aspect-video bg-[#141212] rounded-lg overflow-hidden">
+      <iframe
+        src="https://www.youtube.com/embed/dQw4w9WgXcQ"
+        className="w-full h-full border-0"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowFullScreen
       />
+      {/* Debug display */}
+      <div className="absolute bottom-0 left-0 right-0 bg-black/80 text-white text-xs p-2">
+        Test: Basic YouTube iframe | URL: {url}
+      </div>
     </div>
   )
 }
