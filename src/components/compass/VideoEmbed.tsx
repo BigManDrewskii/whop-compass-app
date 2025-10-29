@@ -65,14 +65,6 @@ export function VideoEmbed({ url, title = 'Video' }: VideoEmbedProps) {
           console.error('[VideoEmbed] Video error:', e)
           setError(true)
         }}
-        config={{
-          youtube: {
-            playerVars: { modestbranding: 1, rel: 0 }
-          },
-          vimeo: {
-            playerOptions: { byline: false, portrait: false }
-          }
-        }}
       />
     </div>
   )
