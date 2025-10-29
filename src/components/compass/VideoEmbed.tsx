@@ -2,30 +2,26 @@
 
 import { useState } from 'react'
 import { Play, AlertCircle } from 'lucide-react'
-import ReactPlayer from 'react-player'
 
 interface VideoEmbedProps {
   url: string
-  title?: string
 }
 
 /**
  * VideoEmbed Component
- * Uses react-player for reliable video embedding
+ * Simple native video player for direct video files
  *
- * Supports: YouTube, Vimeo, Loom, Facebook, Twitch, SoundCloud,
- * Wistia, Mixcloud, DailyMotion, file URLs (mp4, webm, ogg)
+ * Supports: .mp4, .webm, .ogg, .mov files
+ * Works in Whop iframe (no nested iframe issues)
  */
-export function VideoEmbed({ url, title = 'Video' }: VideoEmbedProps) {
-  const [ready, setReady] = useState(false)
+export function VideoEmbed({ url }: VideoEmbedProps) {
+  const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
-
-  console.log('[VideoEmbed] Rendering with react-player:', url)
 
   return (
     <div className="w-full aspect-video bg-[#141212] rounded-lg overflow-hidden relative">
       {/* Loading State */}
-      {!ready && !error && (
+      {loading && !error && (
         <div className="absolute inset-0 bg-[#262626] flex items-center justify-center z-10">
           <div className="text-center space-y-3">
             <div className="w-16 h-16 mx-auto bg-[#fa4616]/20 rounded-full flex items-center justify-center">
@@ -42,28 +38,24 @@ export function VideoEmbed({ url, title = 'Video' }: VideoEmbedProps) {
           <div className="text-center">
             <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-3" />
             <p className="text-sm text-gray-400">Video failed to load</p>
-            <p className="text-xs text-gray-500 mt-2">URL: {url}</p>
           </div>
         </div>
       )}
 
-      {/* ReactPlayer */}
-      <ReactPlayer
-        url={url}
-        width="100%"
-        height="100%"
-        controls={true}
-        playing={false}
-        onReady={() => {
-          console.log('[VideoEmbed] Video ready')
-          setReady(true)
-        }}
-        onError={(e: any) => {
-          console.error('[VideoEmbed] Video error:', e)
+      {/* Native Video Player */}
+      <video
+        src={url}
+        controls
+        className="w-full h-full object-cover"
+        preload="metadata"
+        onLoadedData={() => setLoading(false)}
+        onError={() => {
+          setLoading(false)
           setError(true)
         }}
-        {...({} as any)}
-      />
+      >
+        Your browser does not support the video tag.
+      </video>
     </div>
   )
 }

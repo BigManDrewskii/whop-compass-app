@@ -4,29 +4,32 @@ import { useCallback, useState } from 'react'
 import { useDropzone } from 'react-dropzone'
 import { Upload, X, Loader2, AlertCircle } from 'lucide-react'
 
-interface ImageDropzoneProps {
+interface MediaDropzoneProps {
   onUploadComplete: (url: string) => void
   currentUrl?: string
   onRemove?: () => void
+  accept?: 'image' | 'video' | 'both'
 }
 
 /**
- * ImageDropzone Component
- * Drag-and-drop + click-to-browse image upload
+ * MediaDropzone Component
+ * Drag-and-drop + click-to-browse file upload for images and videos
  *
  * Features:
+ * - Supports images (max 10MB) and videos (max 50MB)
  * - Drag & drop support
  * - Click to browse
  * - Upload progress
- * - Image preview
+ * - Preview for images, video icon for videos
  * - Error handling
  * - File validation
  */
-export function ImageDropzone({
+export function MediaDropzone({
   onUploadComplete,
   currentUrl,
   onRemove,
-}: ImageDropzoneProps) {
+  accept = 'both',
+}: MediaDropzoneProps) {
   const [uploading, setUploading] = useState(false)
   const [progress, setProgress] = useState(0)
   const [error, setError] = useState<string | null>(null)
@@ -76,13 +79,20 @@ export function ImageDropzone({
     [onUploadComplete]
   )
 
+  // Configure accepted file types based on prop
+  const acceptConfig =
+    accept === 'image' ? { 'image/*': ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg'] } :
+    accept === 'video' ? { 'video/*': ['.mp4', '.webm', '.ogg', '.mov'] } :
+    {
+      'image/*': ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg'],
+      'video/*': ['.mp4', '.webm', '.ogg', '.mov']
+    }
+
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
-    accept: {
-      'image/*': ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg'],
-    },
+    accept: acceptConfig,
     maxFiles: 1,
-    maxSize: 10 * 1024 * 1024, // 10MB
+    maxSize: 50 * 1024 * 1024, // 50MB (handles videos)
     disabled: uploading,
   })
 
@@ -137,14 +147,16 @@ export function ImageDropzone({
             <Upload className="w-10 h-10 text-[#7f7f7f] mx-auto" />
             <div>
               <p className="text-sm font-medium text-[#fafafa]">
-                {isDragActive ? 'Drop image here' : 'Drag & drop image here'}
+                {isDragActive ? 'Drop file here' : 'Drag & drop image or video'}
               </p>
               <p className="text-xs text-gray-500 mt-1">
                 or click to browse
               </p>
             </div>
             <p className="text-xs text-gray-600">
-              Supports JPG, PNG, GIF, WebP, SVG • Max 10MB
+              Images (JPG, PNG, GIF, WebP, SVG) max 10MB
+              <br />
+              Videos (MP4, WebM, OGG, MOV) max 50MB
             </p>
           </div>
         )}
@@ -162,3 +174,6 @@ export function ImageDropzone({
     </div>
   )
 }
+
+// Export as MediaDropzone (new name) and keep ImageDropzone for backwards compatibility
+export { MediaDropzone as ImageDropzone }

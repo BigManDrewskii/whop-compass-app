@@ -26,20 +26,24 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    // Validate file type (images only)
-    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml']
-    if (!validTypes.includes(file.type)) {
+    // Validate file type (images and videos)
+    const validImageTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp', 'image/svg+xml']
+    const validVideoTypes = ['video/mp4', 'video/webm', 'video/ogg', 'video/quicktime']
+    const isImage = validImageTypes.includes(file.type)
+    const isVideo = validVideoTypes.includes(file.type)
+
+    if (!isImage && !isVideo) {
       return NextResponse.json(
-        { error: 'Invalid file type. Only images are allowed (JPG, PNG, GIF, WebP, SVG)' },
+        { error: 'Invalid file type. Only images (JPG, PNG, GIF, WebP, SVG) and videos (MP4, WebM, OGG, MOV) are allowed' },
         { status: 400 }
       )
     }
 
-    // Validate file size (max 10MB)
-    const maxSize = 10 * 1024 * 1024 // 10MB
+    // Validate file size (images: 10MB, videos: 50MB)
+    const maxSize = isVideo ? 50 * 1024 * 1024 : 10 * 1024 * 1024
     if (file.size > maxSize) {
       return NextResponse.json(
-        { error: 'File too large. Maximum size is 10MB' },
+        { error: `File too large. Maximum size is ${isVideo ? '50MB for videos' : '10MB for images'}` },
         { status: 400 }
       )
     }
