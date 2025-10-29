@@ -1,11 +1,8 @@
 'use client'
 
-import dynamic from 'next/dynamic'
 import { useState } from 'react'
 import { Play, AlertCircle } from 'lucide-react'
-
-// Dynamic import to avoid SSR hydration issues
-const ReactPlayer = dynamic(() => import('react-player'), { ssr: false })
+import ReactPlayer from 'react-player'
 
 interface VideoEmbedProps {
   url: string
