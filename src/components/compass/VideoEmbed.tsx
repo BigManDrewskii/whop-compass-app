@@ -93,34 +93,29 @@ export function VideoEmbed({ url, title = 'Video' }: VideoEmbedProps) {
   // Debug: Log converted URL
   console.log('[VideoEmbed] Converted URL:', { original: url, embed: embedUrl, isDirect })
 
-  return (
-    <div className="relative w-full h-full">
-      {/* Loading Skeleton */}
-      {isLoading && (
-        <div className="absolute inset-0 bg-[#262626] rounded-lg flex items-center justify-center z-10">
-          <div className="text-center space-y-3">
-            <div className="w-16 h-16 mx-auto bg-[#fa4616]/20 rounded-full flex items-center justify-center">
-              <Play className="w-8 h-8 text-[#fa4616] animate-pulse" />
-            </div>
-            <p className="text-sm text-gray-400">Loading video...</p>
+  // Conditional rendering instead of overlays
+  if (isLoading) {
+    return (
+      <div className="w-full aspect-video bg-[#262626] rounded-lg flex items-center justify-center">
+        <div className="text-center space-y-3">
+          <div className="w-16 h-16 mx-auto bg-[#fa4616]/20 rounded-full flex items-center justify-center">
+            <Play className="w-8 h-8 text-[#fa4616] animate-pulse" />
           </div>
+          <p className="text-sm text-gray-400">Loading video...</p>
         </div>
-      )}
+      </div>
+    )
+  }
 
-      {/* Error State */}
-      {hasError && (
-        <div className="bg-[#262626] rounded-lg p-8 text-center">
+  if (hasError) {
+    return (
+      <div className="w-full aspect-video bg-[#262626] rounded-lg p-8 flex items-center justify-center">
+        <div className="text-center max-w-md">
           <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
           <h3 className="text-lg font-semibold text-white mb-2">Video Failed to Load</h3>
           <p className="text-sm text-gray-400 mb-4">
-            The video could not be loaded. This might be due to:
+            Could not load video. Check URL or try another platform.
           </p>
-          <ul className="text-xs text-gray-500 text-left max-w-sm mx-auto mb-6 space-y-1">
-            <li>• Invalid video URL</li>
-            <li>• Network connection issues</li>
-            <li>• Video platform restrictions</li>
-            <li>• CORS or privacy settings</li>
-          </ul>
           <button
             onClick={handleRetry}
             className="inline-flex items-center px-4 py-2 bg-[#fa4616] hover:bg-[#e03d12] text-white rounded-lg transition-colors"
@@ -129,36 +124,38 @@ export function VideoEmbed({ url, title = 'Video' }: VideoEmbedProps) {
             Try Again
           </button>
         </div>
-      )}
+      </div>
+    )
+  }
 
-      {/* Direct Video File */}
-      {!hasError && isDirect && (
-        <video
-          key={`video-${retryCount}`}
-          src={url}
-          controls
-          className="w-full rounded-lg shadow-2xl"
-          preload="metadata"
-          onLoadedData={handleLoad}
-          onError={handleError}
-        >
-          Your browser does not support the video tag.
-        </video>
-      )}
+  // Direct video file
+  if (isDirect) {
+    return (
+      <video
+        key={`video-${retryCount}`}
+        src={url}
+        controls
+        className="w-full aspect-video rounded-lg object-cover"
+        preload="metadata"
+        onLoadedData={handleLoad}
+        onError={handleError}
+      >
+        Your browser does not support the video tag.
+      </video>
+    )
+  }
 
-      {/* Embedded Video (YouTube/Vimeo/Loom) */}
-      {!hasError && !isDirect && (
-        <iframe
-          key={`iframe-${retryCount}`}
-          src={embedUrl}
-          title={title}
-          className="w-full h-full rounded-lg"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-          allowFullScreen
-          onLoad={handleLoad}
-          onError={handleError}
-        />
-      )}
-    </div>
+  // Embedded video (YouTube/Vimeo/Loom)
+  return (
+    <iframe
+      key={`iframe-${retryCount}`}
+      src={embedUrl}
+      title={title}
+      className="w-full aspect-video rounded-lg border-0"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+      allowFullScreen
+      onLoad={handleLoad}
+      onError={handleError}
+    />
   )
 }
