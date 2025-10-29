@@ -33,10 +33,10 @@ export function BackButton({
       router.back()
     } else if (fallbackHref) {
       // Fallback to specific route
-      router.push(fallbackHref)
+      router.push(fallbackHref as any)
     } else {
       // Default fallback to root
-      router.push('/')
+      router.push('/' as any)
     }
   }
 
