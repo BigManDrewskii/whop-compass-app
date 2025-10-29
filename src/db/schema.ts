@@ -1,4 +1,4 @@
-import { pgTable, text, timestamp, uuid, serial, integer, index } from 'drizzle-orm/pg-core'
+import { pgTable, text, timestamp, uuid, serial, integer, index, jsonb } from 'drizzle-orm/pg-core'
 
 // Users table - for authentication and role management
 export const users = pgTable('users', {
@@ -39,3 +39,21 @@ export const tasks = pgTable('tasks', {
 	createdAt: timestamp('created_at').defaultNow().notNull(),
 	updatedAt: timestamp('updated_at').defaultNow().notNull(),
 })
+
+// Company Themes table - stores theme customization per company
+export const companyThemes = pgTable('company_themes', {
+	id: serial('id').primaryKey(),
+	companyId: text('companyId').notNull().unique(), // One theme per company
+	themeName: text('themeName').default('Custom Theme'),
+	colors: jsonb('colors').notNull(), // ThemeColors object
+	typography: jsonb('typography').notNull(), // ThemeTypography object
+	borderRadius: jsonb('borderRadius').notNull(), // ThemeBorderRadius object
+	spacing: jsonb('spacing').notNull(), // ThemeSpacing object
+	mode: text('mode', { enum: ['light', 'dark', 'auto'] }).default('dark').notNull(),
+	customCSS: text('customCSS'), // Optional custom CSS overrides
+	createdAt: timestamp('created_at').defaultNow().notNull(),
+	updatedAt: timestamp('updated_at').defaultNow().notNull(),
+}, (table) => ({
+	// Index for fast company lookups
+	companyIdx: index('idx_company_theme').on(table.companyId),
+}))

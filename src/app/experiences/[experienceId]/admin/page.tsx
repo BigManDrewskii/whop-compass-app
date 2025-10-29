@@ -2,8 +2,10 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useWhop } from '~/components/whop-context'
-import { Plus, Loader2, Pencil, GripVertical } from 'lucide-react'
+import { Plus, Loader2, Pencil, GripVertical, Palette } from 'lucide-react'
 import { useState } from 'react'
+import { useParams } from 'next/navigation'
+import Link from 'next/link'
 import { DragDropContext, Droppable, Draggable, type DropResult } from '@hello-pangea/dnd'
 import { CardEditor } from '~/components/compass/CardEditor'
 
@@ -23,6 +25,8 @@ interface Card {
 
 export default function AdminDashboard() {
 	const { access } = useWhop()
+	const params = useParams()
+	const experienceId = params.experienceId as string
 	const queryClient = useQueryClient()
 	const [isCreating, setIsCreating] = useState(false)
 	const [editingCard, setEditingCard] = useState<Card | null>(null)
@@ -137,11 +141,20 @@ export default function AdminDashboard() {
 		<div className="min-h-screen bg-[#141212] py-8 px-4 sm:px-6 lg:px-8">
 			<div className="max-w-4xl mx-auto">
 				{/* Header */}
-				<div className="mb-8">
-					<h1 className="text-3xl font-bold text-white">Compass - Onboarding Cards</h1>
-					<p className="mt-2 text-gray-400">
-						Create and manage your community's onboarding experience
-					</p>
+				<div className="mb-8 flex items-start justify-between">
+					<div>
+						<h1 className="text-3xl font-bold text-white">Compass - Onboarding Cards</h1>
+						<p className="mt-2 text-gray-400">
+							Create and manage your community's onboarding experience
+						</p>
+					</div>
+					<Link
+						href={`/experiences/${experienceId}/admin/theme`}
+						className="inline-flex items-center px-4 py-2 bg-[#262626] border border-[#7f7f7f]/20 hover:border-[#fa4616]/50 text-white font-medium rounded-lg transition-colors"
+					>
+						<Palette className="w-4 h-4 mr-2" />
+						Theme Editor
+					</Link>
 				</div>
 
 				{/* Add Card Button */}
