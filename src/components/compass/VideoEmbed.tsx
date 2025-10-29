@@ -93,8 +93,14 @@ export function VideoEmbed({ url, title = 'Video' }: VideoEmbedProps) {
   // Debug: Log converted URL
   console.log('[VideoEmbed] Converted URL:', { original: url, embed: embedUrl, isDirect })
 
+  // For iframes, don't wait for onLoad (often doesn't fire)
+  // Set loading to false immediately after first render
+  if (!isDirect && isLoading) {
+    setTimeout(() => setIsLoading(false), 100)
+  }
+
   // Conditional rendering instead of overlays
-  if (isLoading) {
+  if (isLoading && isDirect) {
     return (
       <div className="w-full aspect-video bg-[#262626] rounded-lg flex items-center justify-center">
         <div className="text-center space-y-3">
@@ -154,8 +160,6 @@ export function VideoEmbed({ url, title = 'Video' }: VideoEmbedProps) {
       className="w-full aspect-video rounded-lg border-0"
       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
       allowFullScreen
-      onLoad={handleLoad}
-      onError={handleError}
     />
   )
 }
