@@ -1,7 +1,11 @@
 'use client'
 
+import dynamic from 'next/dynamic'
 import { useState } from 'react'
-import { Play, AlertCircle, RotateCcw } from 'lucide-react'
+import { Play, AlertCircle } from 'lucide-react'
+
+// Dynamic import to avoid SSR hydration issues
+const ReactPlayer = dynamic(() => import('react-player/lazy'), { ssr: false })
 
 interface VideoEmbedProps {
   url: string
@@ -10,156 +14,58 @@ interface VideoEmbedProps {
 
 /**
  * VideoEmbed Component
- * Bulletproof video embedding with loading states and error handling
+ * Uses react-player for reliable video embedding
  *
- * Features:
- * - Loading skeleton while iframe loads
- * - Error boundary with retry
- * - Supports YouTube, Vimeo, direct videos
- * - Proper CORS attributes
- * - Responsive 16:9 aspect ratio
- * - Fallback UI for failed embeds
+ * Supports: YouTube, Vimeo, Loom, Facebook, Twitch, SoundCloud,
+ * Wistia, Mixcloud, DailyMotion, file URLs (mp4, webm, ogg)
  */
 export function VideoEmbed({ url, title = 'Video' }: VideoEmbedProps) {
-  const [isLoading, setIsLoading] = useState(true)
-  const [hasError, setHasError] = useState(false)
-  const [retryCount, setRetryCount] = useState(0)
+  const [ready, setReady] = useState(false)
+  const [error, setError] = useState(false)
 
-  // Debug: Log video URL
-  console.log('[VideoEmbed] Rendering video:', { url, title, isLoading, hasError })
+  console.log('[VideoEmbed] Rendering with react-player:', url)
 
-  const convertToEmbedUrl = (videoUrl: string): string => {
-    // YouTube watch URLs
-    const youtubeWatch = videoUrl.match(/youtube\.com\/watch\?v=([^&]+)/)
-    if (youtubeWatch) {
-      return `https://www.youtube.com/embed/${youtubeWatch[1]}`
-    }
-
-    // YouTube short URLs
-    const youtubeShort = videoUrl.match(/youtu\.be\/([^?]+)/)
-    if (youtubeShort) {
-      return `https://www.youtube.com/embed/${youtubeShort[1]}`
-    }
-
-    // Vimeo URLs
-    const vimeo = videoUrl.match(/vimeo\.com\/(\d+)/)
-    if (vimeo) {
-      return `https://player.vimeo.com/video/${vimeo[1]}`
-    }
-
-    // Loom share URLs (convert to embed)
-    const loomShare = videoUrl.match(/loom\.com\/share\/([a-zA-Z0-9]+)/)
-    if (loomShare) {
-      return `https://www.loom.com/embed/${loomShare[1]}`
-    }
-
-    // Loom embed URLs (already in correct format)
-    if (videoUrl.includes('loom.com/embed/')) {
-      return videoUrl
-    }
-
-    // Already an embed URL or direct video
-    return videoUrl
-  }
-
-  const isDirectVideo = (videoUrl: string): boolean => {
-    return (
-      videoUrl.endsWith('.mp4') ||
-      videoUrl.endsWith('.webm') ||
-      videoUrl.endsWith('.ogg') ||
-      videoUrl.endsWith('.mov')
-    )
-  }
-
-  const handleLoad = () => {
-    setIsLoading(false)
-    setHasError(false)
-  }
-
-  const handleError = () => {
-    setIsLoading(false)
-    setHasError(true)
-  }
-
-  const handleRetry = () => {
-    setIsLoading(true)
-    setHasError(false)
-    setRetryCount(retryCount + 1)
-  }
-
-  const embedUrl = convertToEmbedUrl(url)
-  const isDirect = isDirectVideo(url)
-
-  // Debug: Log converted URL
-  console.log('[VideoEmbed] Converted URL:', { original: url, embed: embedUrl, isDirect })
-
-  // For iframes, don't wait for onLoad (often doesn't fire)
-  // Set loading to false immediately after first render
-  if (!isDirect && isLoading) {
-    setTimeout(() => setIsLoading(false), 100)
-  }
-
-  // Conditional rendering instead of overlays
-  if (isLoading && isDirect) {
-    return (
-      <div className="w-full aspect-video bg-[#262626] rounded-lg flex items-center justify-center">
-        <div className="text-center space-y-3">
-          <div className="w-16 h-16 mx-auto bg-[#fa4616]/20 rounded-full flex items-center justify-center">
-            <Play className="w-8 h-8 text-[#fa4616] animate-pulse" />
-          </div>
-          <p className="text-sm text-gray-400">Loading video...</p>
-        </div>
-      </div>
-    )
-  }
-
-  if (hasError) {
-    return (
-      <div className="w-full aspect-video bg-[#262626] rounded-lg p-8 flex items-center justify-center">
-        <div className="text-center max-w-md">
-          <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
-          <h3 className="text-lg font-semibold text-white mb-2">Video Failed to Load</h3>
-          <p className="text-sm text-gray-400 mb-4">
-            Could not load video. Check URL or try another platform.
-          </p>
-          <button
-            onClick={handleRetry}
-            className="inline-flex items-center px-4 py-2 bg-[#fa4616] hover:bg-[#e03d12] text-white rounded-lg transition-colors"
-          >
-            <RotateCcw className="w-4 h-4 mr-2" />
-            Try Again
-          </button>
-        </div>
-      </div>
-    )
-  }
-
-  // Direct video file
-  if (isDirect) {
-    return (
-      <video
-        key={`video-${retryCount}`}
-        src={url}
-        controls
-        className="w-full aspect-video rounded-lg object-cover"
-        preload="metadata"
-        onLoadedData={handleLoad}
-        onError={handleError}
-      >
-        Your browser does not support the video tag.
-      </video>
-    )
-  }
-
-  // Embedded video (YouTube/Vimeo/Loom)
   return (
-    <iframe
-      key={`iframe-${retryCount}`}
-      src={embedUrl}
-      title={title}
-      className="w-full aspect-video rounded-lg border-0"
-      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-      allowFullScreen
-    />
+    <div className="w-full aspect-video bg-[#141212] rounded-lg overflow-hidden relative">
+      {/* Loading State */}
+      {!ready && !error && (
+        <div className="absolute inset-0 bg-[#262626] flex items-center justify-center z-10">
+          <div className="text-center space-y-3">
+            <div className="w-16 h-16 mx-auto bg-[#fa4616]/20 rounded-full flex items-center justify-center">
+              <Play className="w-8 h-8 text-[#fa4616] animate-pulse" />
+            </div>
+            <p className="text-sm text-gray-400">Loading video...</p>
+          </div>
+        </div>
+      )}
+
+      {/* Error State */}
+      {error && (
+        <div className="absolute inset-0 bg-[#262626] flex items-center justify-center p-4">
+          <div className="text-center">
+            <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-3" />
+            <p className="text-sm text-gray-400">Video failed to load</p>
+          </div>
+        </div>
+      )}
+
+      {/* ReactPlayer */}
+      <ReactPlayer
+        url={url}
+        width="100%"
+        height="100%"
+        controls
+        onReady={() => setReady(true)}
+        onError={() => setError(true)}
+        config={{
+          youtube: {
+            playerVars: { modestbranding: 1, rel: 0 }
+          },
+          vimeo: {
+            playerOptions: { byline: false, portrait: false }
+          }
+        }}
+      />
+    </div>
   )
 }
