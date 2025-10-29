@@ -78,7 +78,7 @@ export function Breadcrumbs() {
               <span className="text-[#fafafa] font-medium">{item.label}</span>
             ) : (
               <Link
-                href={item.href}
+                href={item.href as any}
                 className="text-gray-400 hover:text-[#fa4616] transition-colors"
               >
                 {item.label}
