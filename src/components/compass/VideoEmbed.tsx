@@ -52,16 +52,17 @@ export function VideoEmbed({ url, title = 'Video' }: VideoEmbedProps) {
         url={url}
         width="100%"
         height="100%"
-        controls
+        controls={true}
         playing={false}
         onReady={() => {
           console.log('[VideoEmbed] Video ready')
           setReady(true)
         }}
-        onError={(e) => {
+        onError={(e: any) => {
           console.error('[VideoEmbed] Video error:', e)
           setError(true)
         }}
+        {...({} as any)}
       />
     </div>
   )
