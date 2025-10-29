@@ -8,6 +8,7 @@ import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import { DragDropContext, Droppable, Draggable, type DropResult } from '@hello-pangea/dnd'
 import { CardEditor } from '~/components/compass/CardEditor'
+import { BackButton } from '~/components/navigation'
 
 interface Card {
 	id: number
@@ -140,6 +141,11 @@ export default function AdminDashboard() {
 	return (
 		<div className="min-h-screen bg-[#141212] py-8 px-4 sm:px-6 lg:px-8">
 			<div className="max-w-4xl mx-auto">
+				{/* Back Button */}
+				<div className="mb-4">
+					<BackButton fallbackHref={`/experiences/${experienceId}`} />
+				</div>
+
 				{/* Header */}
 				<div className="mb-8 flex items-start justify-between">
 					<div>

@@ -3,11 +3,15 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useWhop } from '~/components/whop-context'
+import { useParams } from 'next/navigation'
 import { Palette, RotateCcw, Save, Eye, Download, Upload } from 'lucide-react'
 import { whopDarkTheme, whopLightTheme, minimalTheme, professionalTheme, type ThemeConfig } from '~/lib/theme'
+import { BackButton } from '~/components/navigation'
 
 export default function ThemeEditorPage() {
   const { access, experience } = useWhop()
+  const params = useParams()
+  const experienceId = params.experienceId as string
   const queryClient = useQueryClient()
   const companyId = experience.company.id
 
@@ -141,6 +145,11 @@ export default function ThemeEditorPage() {
   return (
     <div className="min-h-screen bg-[#141212] py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-6xl mx-auto">
+        {/* Back Button */}
+        <div className="mb-4">
+          <BackButton label="Back to Admin" fallbackHref={`/experiences/${experienceId}/admin`} />
+        </div>
+
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center justify-between">

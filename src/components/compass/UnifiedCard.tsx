@@ -1,5 +1,7 @@
 'use client'
 
+import { VideoEmbed } from './VideoEmbed'
+
 interface UnifiedCardProps {
   banner?: {
     type: 'image' | 'video' | null
@@ -10,33 +12,6 @@ interface UnifiedCardProps {
 }
 
 export function UnifiedCard({ banner, title, content }: UnifiedCardProps) {
-  const convertToEmbedUrl = (url: string): string => {
-    // YouTube watch URLs
-    const youtubeWatch = url.match(/youtube\.com\/watch\?v=([^&]+)/)
-    if (youtubeWatch) {
-      return `https://www.youtube.com/embed/${youtubeWatch[1]}`
-    }
-
-    // YouTube short URLs
-    const youtubeShort = url.match(/youtu\.be\/([^?]+)/)
-    if (youtubeShort) {
-      return `https://www.youtube.com/embed/${youtubeShort[1]}`
-    }
-
-    // Vimeo URLs
-    const vimeo = url.match(/vimeo\.com\/(\d+)/)
-    if (vimeo) {
-      return `https://player.vimeo.com/video/${vimeo[1]}`
-    }
-
-    // Already an embed URL or direct video
-    return url
-  }
-
-  const isDirectVideo = (url: string | null) => {
-    if (!url) return false
-    return url.endsWith('.mp4') || url.endsWith('.webm') || url.endsWith('.ogg')
-  }
 
   return (
     <div className="relative min-h-screen flex items-center justify-center p-4 sm:p-8">
@@ -59,28 +34,7 @@ export function UnifiedCard({ banner, title, content }: UnifiedCardProps) {
             )}
 
             {banner.type === 'video' && (
-              <>
-                {isDirectVideo(banner.url) ? (
-                  // Direct video file
-                  <video
-                    src={banner.url}
-                    controls
-                    className="w-full h-full object-cover"
-                    preload="metadata"
-                  >
-                    Your browser does not support the video tag.
-                  </video>
-                ) : (
-                  // Embedded video (YouTube/Vimeo)
-                  <iframe
-                    src={convertToEmbedUrl(banner.url)}
-                    title={title}
-                    className="w-full h-full"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                  />
-                )}
-              </>
+              <VideoEmbed url={banner.url} title={title} />
             )}
           </div>
         )}

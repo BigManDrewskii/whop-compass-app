@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { X, Layout } from 'lucide-react'
+import { ImageDropzone } from '~/components/upload/ImageDropzone'
 
 interface Card {
 	id: number
@@ -139,48 +140,75 @@ export function CardEditor({ card, isOpen, onClose, onSave }: CardEditorProps) {
 
 					{/* Content */}
 					<div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
-						{/* Banner URL Field (Optional) */}
+						{/* Banner Section (Optional) */}
 						<div>
-							<label className="block text-sm font-medium text-gray-300 mb-1">
+							<label className="block text-sm font-medium text-gray-300 mb-3">
 								Banner (Optional)
 							</label>
-							<input
-								type="url"
-								value={bannerUrl}
-								onChange={(e) => setBannerUrl(e.target.value)}
-								placeholder="Image or video URL (leave empty for text-only card)"
-								className="w-full px-3 py-2 bg-[#141212] border border-[#7f7f7f]/30 rounded-md text-[#fafafa] placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#fa4616] focus:border-[#fa4616] transition-colors"
-							/>
-							<p className="mt-1 text-xs text-gray-500">
-								Supports: images (.jpg, .png), videos (.mp4), YouTube, Vimeo
-							</p>
 
-							{/* Banner Preview */}
-							{bannerUrl && detectMediaType(bannerUrl) === 'image' && (
-								<div className="mt-3">
-									<p className="text-xs font-medium text-gray-300 mb-2">Preview:</p>
-									<img
-										src={bannerUrl}
-										alt="Banner preview"
-										className="w-full h-48 object-cover rounded-md border border-[#7f7f7f]/30"
-										onError={(e) => {
-											e.currentTarget.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="300"%3E%3Crect fill="%23262626" width="400" height="300"/%3E%3Ctext x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" fill="%237f7f7f" font-family="sans-serif"%3EInvalid image URL%3C/text%3E%3C/svg%3E'
-										}}
+							{/* Image Upload or URL Input */}
+							{!bannerUrl || detectMediaType(bannerUrl) === 'image' ? (
+								<div className="space-y-3">
+									{/* Image Dropzone */}
+									<ImageDropzone
+										currentUrl={bannerUrl && detectMediaType(bannerUrl) === 'image' ? bannerUrl : undefined}
+										onUploadComplete={(url) => setBannerUrl(url)}
+										onRemove={() => setBannerUrl('')}
+									/>
+
+									{/* Or URL Input */}
+									<div className="relative">
+										<div className="absolute inset-0 flex items-center">
+											<div className="w-full border-t border-[#7f7f7f]/30"></div>
+										</div>
+										<div className="relative flex justify-center text-xs">
+											<span className="px-2 bg-[#262626] text-gray-500">or paste URL</span>
+										</div>
+									</div>
+
+									<input
+										type="url"
+										value={bannerUrl}
+										onChange={(e) => setBannerUrl(e.target.value)}
+										placeholder="Paste image or video URL..."
+										className="w-full px-3 py-2 bg-[#141212] border border-[#7f7f7f]/30 rounded-md text-[#fafafa] placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#fa4616] focus:border-[#fa4616] transition-colors text-sm"
 									/>
 								</div>
-							)}
+							) : (
+								<div className="space-y-3">
+									{/* Video URL Input */}
+									<div className="flex gap-2">
+										<input
+											type="url"
+											value={bannerUrl}
+											onChange={(e) => setBannerUrl(e.target.value)}
+											placeholder="Video URL (YouTube, Vimeo, or direct link)"
+											className="flex-1 px-3 py-2 bg-[#141212] border border-[#7f7f7f]/30 rounded-md text-[#fafafa] placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#fa4616] focus:border-[#fa4616] transition-colors"
+										/>
+										<button
+											type="button"
+											onClick={() => setBannerUrl('')}
+											className="px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded-md transition-colors"
+										>
+											<X className="w-4 h-4" />
+										</button>
+									</div>
 
-							{bannerUrl && detectMediaType(bannerUrl) === 'video' && (
-								<div className="mt-3">
-									<p className="text-xs font-medium text-gray-300 mb-2">
-										Video URL detected
-									</p>
-									<div className="text-xs text-gray-500 space-y-1">
-										<p>✓ Will be displayed as banner in the card</p>
-										<p>✓ Supports YouTube, Vimeo, and direct video links</p>
+									{/* Video Hints */}
+									<div className="bg-[#fa4616]/10 border border-[#fa4616]/30 rounded-lg p-3">
+										<p className="text-xs font-medium text-[#fa4616] mb-2">✓ Video URL detected</p>
+										<div className="text-xs text-gray-400 space-y-1">
+											<p>• YouTube: youtube.com/watch?v=...</p>
+											<p>• Vimeo: vimeo.com/...</p>
+											<p>• Direct: .mp4, .webm, .ogg files</p>
+										</div>
 									</div>
 								</div>
 							)}
+
+							<p className="mt-2 text-xs text-gray-500">
+								Upload an image or paste a video URL • Leave empty for text-only card
+							</p>
 						</div>
 
 						{/* Title Field (Always Present) */}
